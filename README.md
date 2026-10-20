@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -14,19 +14,24 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        gradle-version: '8.7'
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: |
+        if [ -d "KaboApp" ]; then cd KaboApp; fi
+        gradle assembleDebug --no-daemon
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: '**/build/outputs/apk/debug/*.apk'
+
